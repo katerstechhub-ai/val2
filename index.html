@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ehi — Will you be my Valentine?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-pink-100 via-white to-rose-100 flex items-center justify-center p-6">
+    <div id="card" class="relative w-full max-w-xl bg-white/70 backdrop-blur-md rounded-2xl shadow-xl p-8 text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-rose-600 mb-4">Ehi 💖</h1>
+        <p class="text-gray-700 mb-6">Will you be my Valentine?</p>
+
+        <div class="relative h-40 md:h-48 flex items-center justify-center">
+            <div id="confettiArea" class="absolute inset-0 pointer-events-none"></div>
+
+            <button id="yesBtn"
+                class="z-10 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-full shadow-lg mr-6 focus:outline-none focus:ring-4 focus:ring-rose-200">
+                Yes!
+            </button>
+
+            <div id="noWrap" class="z-10 absolute">
+                <button id="noBtn"
+                    class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-200">
+                    No
+                </button>
+            </div>
+        </div>
+
+        <p id="hint" class="text-sm text-gray-500 mt-6">(Try to click "No" if you dare.)</p>
+    </div>
+
+    <script>
+        const card = document.getElementById('card');
+        const noWrap = document.getElementById('noWrap');
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const hint = document.getElementById('hint');
+
+        // keep the "No" button within the card content area
+        function placeNoRandom() {
+            const area = card.getBoundingClientRect();
+            const wrap = noWrap.getBoundingClientRect();
+            const margin = 12; // padding from edges
+
+            const maxX = Math.max(0, area.width - wrap.width - margin * 2);
+            const maxY = Math.max(0, area.height - wrap.height - margin * 2);
+
+            // choose random position within the card center area (avoid overlapping the Yes button roughly)
+            let x = Math.floor(Math.random() * maxX) + margin;
+            let y = Math.floor(Math.random() * maxY) + margin;
+
+            // translate coordinates relative to card: place inside the visible content area
+            noWrap.style.left = x + 'px';
+            noWrap.style.top = y + 'px';
+        }
+
+        function dodge(event) {
+            // Move to new random spot when mouse enters or focuses
+            placeNoRandom();
+        }
+
+        // Try to make it hard to click: move on mouseenter, pointerover, focus
+        noBtn.addEventListener('mouseenter', dodge);
+        noBtn.addEventListener('pointerenter', dodge);
+        noBtn.addEventListener('focus', dodge);
+        noBtn.addEventListener('mousedown', (e) => {
+            // if user tries to mousedown, move and cancel the event
+            dodge();
+            e.preventDefault();
+        });
+
+        // If by chance it's clicked, nudge it away and show playful message
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            placeNoRandom();
+            hint.textContent = "Nope! Try again 😉";
+        });
+
+        // Yes button handler: show celebration
+        yesBtn.addEventListener('click', () => {
+            hint.textContent = "Yay! 💕 Thank you, Ehi!";
+            // simple confetti effect
+            for (let i = 0; i < 30; i++) {
+                const el = document.createElement('div');
+                el.className = "absolute w-2 h-2 rounded-full opacity-90";
+                const colors = ['#F97316', '#FB7185', '#F472B6', '#60A5FA', '#34D399'];
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.top = Math.random() * 100 + '%';
+                el.style.transform = `translate(-50%, -50%) scale(${0.6 + Math.random() * 0.9})`;
+                document.getElementById('confettiArea').appendChild(el);
+                setTimeout(() => el.remove(), 2500 + Math.random() * 1000);
+            }
+        });
+
+        // Initial placement after layout
+        window.addEventListener('load', () => {
+            // position noWrap near right side initially
+            noWrap.style.transition = 'left 220ms ease, top 220ms ease';
+            placeNoRandom();
+        });
+
+        // Recalculate on resize
+        window.addEventListener('resize', placeNoRandom);
+    </script>
+</body>
+
+</html>
